@@ -57,7 +57,7 @@ describe ('E2E Tests', () => {
   });
 
   //
-  describe("Simulation", () => {
+  describe("Simulation - Create -> Rollback -> Create", () => {
     //
     it('1. POST /blocks creates initial block, credit to address 0', async () => {
       //

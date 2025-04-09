@@ -1,3 +1,13 @@
+## To run unit tests
+```bash
+bun test
+```
+
+## To run end to end
+```bash
+bun test:e2e
+```
+
 # EMURGO Backend Engineer Challenge
 
 This challenge is designed to evaluate your skills with data processing and API development. You will be responsible for creating an indexer that will keep track of the balance of each address in a blockchain.

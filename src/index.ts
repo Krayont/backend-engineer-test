@@ -1,61 +1,69 @@
 import Fastify from 'fastify';
-import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
+import type { Pool } from 'pg';
 
-const fastify = Fastify({ logger: true });
+//
+import DbClient from './utilities/database/client';
+import Logger from "./utilities/logger";
+import routes from './routes/v1.route';
+import Migrations from './migrations/migration';
 
-fastify.get('/', async (request, reply) => {
-  return { hello: 'world' };
+console.log('Starting application...');
+
+//
+const fastify = Fastify({ 
+  logger: true,
+  genReqId() {
+    return randomUUID();
+  },
 });
 
-async function testPostgres(pool: Pool) {
-  const id = randomUUID();
-  const name = 'Satoshi';
-  const email = 'Nakamoto';
+// Register the bootstrap to fastify lifecycle
+fastify.register(async (app) => {
+  Logger.setLogger(app.log);
+  Logger.info('Bootstrapping...');
+  try {
+    //
+	  const databaseUrl = `${process.env.DATABASE_URL}`;
+    const databaseName = `${process.env.DB_NAME}`;
 
-  await pool.query(`DELETE FROM users;`);
+    // Init database connection
+    await DbClient.init(databaseUrl, databaseName);
 
-  await pool.query(`
-    INSERT INTO users (id, name, email)
-    VALUES ($1, $2, $3);
-  `, [id, name, email]);
+    // Create tables
+    await Migrations.run();
 
-  const { rows } = await pool.query(`
-    SELECT * FROM users;
-  `);
-
-  console.log('USERS', rows);
-}
-
-async function createTables(pool: Pool) {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL
-    );
-  `);
-}
-
-async function bootstrap() {
-  console.log('Bootstrapping...');
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required');
+  } catch (error) {
+    Logger.error('Error initializing database:', error);
+    throw error;
   }
+});
 
-  const pool = new Pool({
-    connectionString: databaseUrl
+// Register routes
+fastify.register(routes);
+
+// 
+fastify.addHook('onRequest', (req, reply, done) => {
+  Logger.setLogger(req.log.child({ reqId: req.id }));
+  done();
+});
+
+// Global error handler
+fastify.setErrorHandler((error, request, reply) => {
+  // Log the error
+  fastify.log.error(error);
+
+  // Customize the error response
+  reply.status(error.statusCode || 500).send({
+    error: 'Internal Server Error',
+    message: error.message || 'Something went wrong',
   });
+});
 
-  await createTables(pool);
-  await testPostgres(pool);
-}
-
+//
 try {
-  await bootstrap();
   await fastify.listen({
-    port: 3000,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
     host: '0.0.0.0'
   })
 } catch (err) {

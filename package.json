@@ -3,12 +3,21 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "dev": "bun run --hot src/index.ts",
     "start": "bun src/index.ts",
+    "test:unit": "bun test spec/unit",
+    "test:unit:controller": "bun test spec/unit/controller",
+    "test:unit:service": "bun test spec/unit/service",
+    "test:unit:modal": "bun test spec/unit/modal",
+    "test:unit:utilities": "bun test spec/unit/utilities",
+    "test:e2e": "vitest run test --config vitest.config.ts",
     "run-docker": "docker-compose up -d --build"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/pg": "^8.11.8"
+    "@types/pg": "^8.11.8",
+    "@vitest/coverage-c8": "^0.33.0",
+    "vitest": "^3.1.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -16,5 +25,10 @@
   "dependencies": {
     "fastify": "^4.28.1",
     "pg": "^8.12.0"
+  },
+  "vitest": {
+    "globals": true,
+    "environment": "node",
+    "include": ["tests/**/*.ts"]
   }
 }

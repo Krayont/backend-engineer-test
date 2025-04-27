@@ -3,6 +3,7 @@
 bun test
 ```
 
+
 ## To run end to end
 I ran into an issue with Bun: https://github.com/oven-sh/bun/issues/8358
 so i installed vitest to handle the E2E testing.

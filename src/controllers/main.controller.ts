@@ -13,69 +13,70 @@ import LedgerService from "../services/ledger.service";
 
 //
 const	createBlock = async (req: FastifyRequest, res: FastifyReply) => {
-	try {
-		//
-		const block = req.body as IBlock;
-		
-		const validationResult = await BlockService.validateBlockInformation(block);
+  try {
+    //
+    const block = req.body as IBlock;
+    
+    const validationResult = await BlockService.validateBlockInformation(block);
 
-		if (!validationResult.success) {
-			Logger.error(validationResult.response);
-			return res.status(400).send({
-				message: validationResult.response
-			})
-		}
+    if (!validationResult.success) {
+      Logger.error(validationResult.response);
+      return res.status(400).send({
+        message: validationResult.response
+      })
+    }
+    
+    // check if the block is valid
+    const blockCreateResult =	await BlockService.createBlock(block);
+    if (!blockCreateResult.success) {
+      Logger.error(blockCreateResult.response);
+      return res.status(400).send({
+        message: blockCreateResult.response
+      })
+    }
 
-		const blockCreateResult =	await BlockService.createBlock(block);
-		if (!blockCreateResult.success) {
-			Logger.error(blockCreateResult.response);
-			return res.status(400).send({
-				message: blockCreateResult.response
-			})
-		}
+    //
+    return res.status(200).send({
+      message: blockCreateResult.response,
+    });
 
-		//
-		return res.status(200).send({
-			message: blockCreateResult.response,
-		});
-
-	} catch (error: any) {
-		Logger.error(error);
-		res.status(500).send({
-			message: error?.message ?? "Internal Server Error"
-		});
-	}
+  } catch (error: any) {
+    Logger.error(error);
+    res.status(500).send({
+      message: error?.message ?? "Internal Server Error"
+    });
+  }
 }
 
 //
 const getBalanceByAddress = async (req: FastifyRequest, res: FastifyReply) => {
-	try {
-		const { address } = req.params as { address: string };
+  try {
+    const { address } = req.params as { address: string };
 
-		if (!address) {
-			return res.status(400).send({
-				message: "Address is required"
-			});
-		}
+    if (!address) {
+      return res.status(400).send({
+        message: "Address is required"
+      });
+    }
 
-		const result = await LedgerService.getBalanceByAddress(address);
+    const result = await LedgerService.getBalanceByAddress(address);
 
-		if (!result.success) {
-			return res.status(400).send({
-				message: result.response
-			});
-		}
+    if (!result.success) {
+      return res.status(400).send({
+        message: result.response
+      });
+    }
 
-		return res.status(200).send({
-			balance: result.response,
-		});
+    return res.status(200).send({
+      balance: result.response,
+    });
 
-	} catch (error) {
-		Logger.error('', error);
-		res.status(500).send({
-			message: "Internal Server Error"
-		});
-	}
+  } catch (error) {
+    Logger.error('', error);
+    res.status(500).send({
+      message: "Internal Server Error"
+    });
+  }
 }
 
 //
@@ -95,13 +96,13 @@ const rollback = async (req: FastifyRequest, res: FastifyReply) => {
     const heightNumber = Number(height);
 
     // Perform rollback logic here (e.g., call a service)
-		const result = await BlockService.rollback(heightNumber);
-		if (!result.success) {
-			Logger.error(result.response);
-			return res.status(400).send({
-				message: result.response
-			})
-		}
+    const result = await BlockService.rollback(heightNumber);
+    if (!result.success) {
+      Logger.error(result.response);
+      return res.status(400).send({
+        message: result.response
+      })
+    }
 
     return res.status(200).send({
       message: result.response ?? `Rollback to height ${heightNumber} successful`,
@@ -116,7 +117,7 @@ const rollback = async (req: FastifyRequest, res: FastifyReply) => {
 
 //
 export default {
-	createBlock,
-	getBalanceByAddress,
-	rollback
+  createBlock,
+  getBalanceByAddress,
+  rollback
 };

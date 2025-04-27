@@ -32,13 +32,13 @@ const	createBlock = async (req: FastifyRequest, res: FastifyReply) => {
     databaseAdapter = new PostgresAdapter();
 
     //
-		const blockCreateResult =	await BlockService.createBlock(block, databaseAdapter);
-		if (!blockCreateResult.success) {
-			Logger.error(blockCreateResult.response);
-			return res.status(400).send({
-				message: blockCreateResult.response
-			})
-		}
+    const blockCreateResult =	await BlockService.createBlock(block, databaseAdapter);
+    if (!blockCreateResult.success) {
+      Logger.error(blockCreateResult.response);
+      return res.status(400).send({
+        message: blockCreateResult.response
+      })
+    }
 
   } catch (error: any) {
     Logger.error(error);
@@ -52,33 +52,33 @@ const	createBlock = async (req: FastifyRequest, res: FastifyReply) => {
 
 //
 const getBalanceByAddress = async (req: FastifyRequest, res: FastifyReply) => {
-	try {
-		const { address } = req.params as { address: string };
+  try {
+    const { address } = req.params as { address: string };
 
-		if (!address) {
-			return res.status(400).send({
-				message: "Address is required"
-			});
-		}
+    if (!address) {
+      return res.status(400).send({
+        message: "Address is required"
+      });
+    }
 
-		const result = await LedgerService.getBalanceByAddress(address);
+    const result = await LedgerService.getBalanceByAddress(address);
 
-		if (!result.success) {
-			return res.status(400).send({
-				message: result.response
-			});
-		}
+    if (!result.success) {
+      return res.status(400).send({
+        message: result.response
+      });
+    }
 
-		return res.status(200).send({
-			balance: result.response,
-		});
+    return res.status(200).send({
+      balance: result.response,
+    });
 
-	} catch (error) {
-		Logger.error('', error);
-		res.status(500).send({
-			message: "Internal Server Error"
-		});
-	}
+  } catch (error) {
+    Logger.error('', error);
+    res.status(500).send({
+      message: "Internal Server Error"
+    });
+  }
 }
 
 //
@@ -122,7 +122,7 @@ const rollback = async (req: FastifyRequest, res: FastifyReply) => {
 
 //
 export default {
-	createBlock,
-	getBalanceByAddress,
-	rollback
+  createBlock,
+  getBalanceByAddress,
+  rollback
 };
